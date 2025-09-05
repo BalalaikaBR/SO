@@ -4,7 +4,7 @@ public class Processo {
     private int tempoChegada;
     private int tempoEspera;
     private int tempoRetorno;
-    
+
     public Processo(int id, int qtdInstrucao, int tempoChegada) {
         this.id = id;
         this.qtdInstrucao = qtdInstrucao;
@@ -12,8 +12,7 @@ public class Processo {
         this.tempoEspera = 0;
         this.tempoRetorno = 0;
     }
-    
-    
+
     public int getId() { return id; }
     public int getQtdInstrucao() { return qtdInstrucao; }
     public void setQtdInstrucao(int qtdInstrucao) { this.qtdInstrucao = qtdInstrucao; }
@@ -22,8 +21,8 @@ public class Processo {
     public void setTempoEspera(int tempoEspera) { this.tempoEspera = tempoEspera; }
     public int getTempoRetorno() { return tempoRetorno; }
     public void setTempoRetorno(int tempoRetorno) { this.tempoRetorno = tempoRetorno; }
-    
-    @Override 
+
+    @Override
     public String toString() {
         return "Processo{" +
                 "id=" + id +

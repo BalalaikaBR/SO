@@ -4,8 +4,6 @@ public class Escalonador {
     private List<Processo> processos;
     private CPU cpu;
     private int quantum;
-    private int tempoOcioso;
-    private int tempoAtual;
     private List<Processo> processosConcluidos;
     private Map<Algoritmo, EstrategiaEscalonamento> estrategias;
 
@@ -13,11 +11,9 @@ public class Escalonador {
         FCFS, SJF, ROUND_ROBIN
     }
 
-    public Escalonador(CPU cpu, int quantum, int tempoOcioso){
+    public Escalonador(CPU cpu, int quantum) {
         this.cpu = cpu;
         this.quantum = quantum;
-        this.tempoAtual = 0;
-        this.tempoOcioso = 0;
         this.processos = new ArrayList<>();
         this.processosConcluidos = new ArrayList<>();
 
@@ -39,21 +35,19 @@ public class Escalonador {
         System.out.println("\n=== Executando " + algoritmo + " ===");
 
         EstrategiaEscalonamento estrategia = estrategias.get(algoritmo);
-        if (estrategia == null) {
-            System.out.println("Algoritmo não suportado.");
-            return;
-        }
+        EscalonadorContexto contexto = new EscalonadorContexto();
+        cpu.resetarTempos();
 
-        estrategia.executar(processos, cpu, quantum, tempoAtual, processosConcluidos);
-        exibirEstatisticas();
+        estrategia.executar(new ArrayList<>(processos), cpu, quantum, contexto, processosConcluidos);
+        exibirEstatisticas(cpu, contexto);
         reiniciarSimulacao();
     }
 
-    private void exibirEstatisticas() {
+    private void exibirEstatisticas(CPU cpu, EscalonadorContexto contexto) {
         System.out.println("\n--- Estatísticas ---");
         System.out.println("Total de processos: " + processosConcluidos.size());
-        System.out.println("Tempo total de execução: " + cpu.getTempoTotal());
-        System.out.println("Tempo ocioso da CPU: " + cpu.getTempoOcioso());
+        System.out.println("Tempo total de execução: " + contexto.tempoAtual);
+        System.out.println("Tempo ocioso da CPU: " + contexto.tempoOcioso);
 
         double tempoEsperaMedio = processosConcluidos.stream()
                 .mapToInt(Processo::getTempoEspera)
@@ -79,6 +73,5 @@ public class Escalonador {
             p.setTempoRetorno(0);
         }
         processosConcluidos.clear();
-        tempoAtual = 0;
     }
 }

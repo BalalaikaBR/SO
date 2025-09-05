@@ -1,24 +1,27 @@
-import java.util.*;
+import java.util.List;
+import java.util.Comparator;
 
 public class SJF implements EstrategiaEscalonamento {
     @Override
-    public void executar(List<Processo> processos, CPU cpu, int quantum, int tempoAtual, List<Processo> processosConcluidos) {
+    public void executar(List<Processo> processos, CPU cpu, int quantum,
+                         EscalonadorContexto contexto, List<Processo> processosConcluidos) {
         processos.sort(Comparator.comparingInt(Processo::getQtdInstrucao));
 
         for (Processo processo : processos) {
-            if (tempoAtual < processo.getTempoChegada()) {
-                tempoAtual = processo.getTempoChegada();
+            if (contexto.tempoAtual < processo.getTempoChegada()) {
+                contexto.tempoOcioso += processo.getTempoChegada() - contexto.tempoAtual;
+                contexto.tempoAtual = processo.getTempoChegada();
             }
 
-            processo.setTempoEspera(tempoAtual - processo.getTempoChegada());
-
+            processo.setTempoEspera(contexto.tempoAtual - processo.getTempoChegada());
             cpu.setProcessoAtual(processo);
+
             while (processo.getQtdInstrucao() > 0) {
                 cpu.executarInstrucao();
-                tempoAtual++;
+                contexto.tempoAtual++;
             }
 
-            processo.setTempoRetorno(tempoAtual - processo.getTempoChegada());
+            processo.setTempoRetorno(contexto.tempoAtual - processo.getTempoChegada());
             processosConcluidos.add(processo);
             cpu.liberarCPU();
         }

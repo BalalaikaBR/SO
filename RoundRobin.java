@@ -2,43 +2,39 @@ import java.util.*;
 
 public class RoundRobin implements EstrategiaEscalonamento {
     @Override
-    public void executar(List<Processo> processos, CPU cpu, int quantum, int tempoAtual, List<Processo> processosConcluidos) {
+    public void executar(List<Processo> processos, CPU cpu, int quantum,
+                         EscalonadorContexto contexto, List<Processo> processosConcluidos) {
+
         Queue<Processo> fila = new LinkedList<>(processos);
-        Map<Processo, Integer> ultimaVezExecutado = new HashMap<>();
+        Map<Processo, Integer> ultimaExecucao = new HashMap<>();
 
         for (Processo p : processos) {
-            ultimaVezExecutado.put(p, p.getTempoChegada());
+            ultimaExecucao.put(p, p.getTempoChegada());
         }
 
         while (!fila.isEmpty()) {
             Processo processo = fila.poll();
+
+            if (contexto.tempoAtual < processo.getTempoChegada()) {
+                contexto.tempoOcioso += processo.getTempoChegada() - contexto.tempoAtual;
+                contexto.tempoAtual = processo.getTempoChegada();
+            }
+
+            processo.setTempoEspera(processo.getTempoEspera() + (contexto.tempoAtual - ultimaExecucao.get(processo)));
             cpu.setProcessoAtual(processo);
 
-            if (tempoAtual < processo.getTempoChegada()) {
-                cpu.liberarCPU();
-                while (tempoAtual < processo.getTempoChegada()) {
-                    tempoAtual++;
-                    cpu.executarInstrucao();  // CPU ociosa
-                }
-                cpu.setProcessoAtual(processo);
-            }
-
-            processo.setTempoEspera(processo.getTempoEspera() + (tempoAtual - ultimaVezExecutado.get(processo)));
-
             int tempoExecutado = 0;
-            while (processo.getQtdInstrucao() > 0 && tempoExecutado < quantum) {
-                if (cpu.executarInstrucao()) {
-                    tempoExecutado++;
-                       }
-                    tempoAtual++;
-
+            while (tempoExecutado < quantum && processo.getQtdInstrucao() > 0) {
+                cpu.executarInstrucao();
+                contexto.tempoAtual++;
+                tempoExecutado++;
             }
 
-            if (processo.getQtdInstrucao() == 0) {
-                processo.setTempoRetorno(tempoAtual - processo.getTempoChegada());
+            if (processo.getQtdInstrucao() <= 0) {
+                processo.setTempoRetorno(contexto.tempoAtual - processo.getTempoChegada());
                 processosConcluidos.add(processo);
             } else {
-                ultimaVezExecutado.put(processo, tempoAtual);
+                ultimaExecucao.put(processo, contexto.tempoAtual);
                 fila.add(processo);
             }
 
