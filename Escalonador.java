@@ -1,10 +1,11 @@
+
 import java.util.*;
 
 public class Escalonador {
+
     private List<Processo> processos;
     private CPU cpu;
     private int quantum;
-    private List<Processo> processosConcluidos;
     private Map<Algoritmo, EstrategiaEscalonamento> estrategias;
 
     public enum Algoritmo {
@@ -15,7 +16,6 @@ public class Escalonador {
         this.cpu = cpu;
         this.quantum = quantum;
         this.processos = new ArrayList<>();
-        this.processosConcluidos = new ArrayList<>();
 
         estrategias = new HashMap<>();
         estrategias.put(Algoritmo.FCFS, new FCFS());
@@ -38,22 +38,24 @@ public class Escalonador {
         EscalonadorContexto contexto = new EscalonadorContexto();
         cpu.resetarTempos();
 
-        estrategia.executar(new ArrayList<>(processos), cpu, quantum, contexto, processosConcluidos);
-        exibirEstatisticas(cpu, contexto);
+        List<Processo> concluidos = new ArrayList<>();
+        estrategia.executar(new ArrayList<>(processos), cpu, quantum, contexto, concluidos);
+
+        exibirEstatisticas(concluidos, contexto);
         reiniciarSimulacao();
     }
 
-    private void exibirEstatisticas(CPU cpu, EscalonadorContexto contexto) {
+    private void exibirEstatisticas(List<Processo> concluidos, EscalonadorContexto contexto) {
         System.out.println("\n--- Estatísticas ---");
-        System.out.println("Total de processos: " + processosConcluidos.size());
+        System.out.println("Total de processos: " + concluidos.size());
         System.out.println("Tempo total de execução: " + contexto.tempoAtual);
         System.out.println("Tempo ocioso da CPU: " + contexto.tempoOcioso);
 
-        double tempoEsperaMedio = processosConcluidos.stream()
+        double tempoEsperaMedio = concluidos.stream()
                 .mapToInt(Processo::getTempoEspera)
                 .average().orElse(0);
 
-        double tempoRetornoMedio = processosConcluidos.stream()
+        double tempoRetornoMedio = concluidos.stream()
                 .mapToInt(Processo::getTempoRetorno)
                 .average().orElse(0);
 
@@ -61,7 +63,7 @@ public class Escalonador {
         System.out.printf("Tempo de retorno médio: %.2f\n", tempoRetornoMedio);
 
         System.out.println("\nProcessos concluídos:");
-        for (Processo p : processosConcluidos) {
+        for (Processo p : concluidos) {
             System.out.printf("P%d - Espera: %d, Retorno: %d\n",
                     p.getId(), p.getTempoEspera(), p.getTempoRetorno());
         }
@@ -69,9 +71,7 @@ public class Escalonador {
 
     private void reiniciarSimulacao() {
         for (Processo p : processos) {
-            p.setTempoEspera(0);
-            p.setTempoRetorno(0);
+            p.resetar();
         }
-        processosConcluidos.clear();
     }
 }

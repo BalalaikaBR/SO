@@ -1,6 +1,7 @@
 public class Processo {
     private int id;
     private int qtdInstrucao;
+    private int qtdInstrucaoInicial; 
     private int tempoChegada;
     private int tempoEspera;
     private int tempoRetorno;
@@ -8,19 +9,34 @@ public class Processo {
     public Processo(int id, int qtdInstrucao, int tempoChegada) {
         this.id = id;
         this.qtdInstrucao = qtdInstrucao;
+        this.qtdInstrucaoInicial = qtdInstrucao; 
         this.tempoChegada = tempoChegada;
         this.tempoEspera = 0;
         this.tempoRetorno = 0;
     }
 
     public int getId() { return id; }
+
     public int getQtdInstrucao() { return qtdInstrucao; }
+
     public void setQtdInstrucao(int qtdInstrucao) { this.qtdInstrucao = qtdInstrucao; }
+
     public int getTempoChegada() { return tempoChegada; }
+
     public int getTempoEspera() { return tempoEspera; }
+
     public void setTempoEspera(int tempoEspera) { this.tempoEspera = tempoEspera; }
+
     public int getTempoRetorno() { return tempoRetorno; }
+
     public void setTempoRetorno(int tempoRetorno) { this.tempoRetorno = tempoRetorno; }
+
+   
+    public void resetar() {
+        this.qtdInstrucao = qtdInstrucaoInicial;
+        this.tempoEspera = 0;
+        this.tempoRetorno = 0;
+    }
 
     @Override
     public String toString() {
