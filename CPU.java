@@ -1,48 +1,54 @@
 public class CPU {
     private Processo processoAtual;
+    private int tempoTotal;
     private int tempoOcioso;
-    private int tempoTotalExecucao;
-    
+
     public CPU() {
         this.processoAtual = null;
+        this.tempoTotal = 0;
         this.tempoOcioso = 0;
-        this.tempoTotalExecucao = 0;
     }
-    
-    public boolean estaOciosa() {
-        return processoAtual == null;
-    }
-    
-    public void executarInstrucao() {
-        if (processoAtual != null) {
+
+    public boolean executarInstrucao() {
+        if (processoAtual != null && processoAtual.getQtdInstrucao() > 0) {
             processoAtual.setQtdInstrucao(processoAtual.getQtdInstrucao() - 1);
-            tempoTotalExecucao++;
         } else {
             tempoOcioso++;
         }
+        tempoTotal++;
+        return true;
     }
-    
+
+    public boolean estaOciosa() {
+        return processoAtual == null;
+    }
+
     public Processo getProcessoAtual() {
         return processoAtual;
     }
-    
+
     public void setProcessoAtual(Processo processo) {
         this.processoAtual = processo;
     }
-    
+
     public void liberarCPU() {
         this.processoAtual = null;
     }
-    
+
+    public boolean processoConcluido() {
+        return processoAtual != null && processoAtual.getQtdInstrucao() <= 0;
+    }
+
+    public int getTempoTotal() {
+        return tempoTotal;
+    }
+
     public int getTempoOcioso() {
         return tempoOcioso;
     }
-    
-    public int getTempoTotalExecucao() {
-        return tempoTotalExecucao;
-    }
-    
-    public boolean processoConcluido() {
-        return processoAtual != null && processoAtual.getQtdInstrucao() <= 0;
+
+    public void resetarTempos() {
+        this.tempoTotal = 0;
+        this.tempoOcioso = 0;
     }
 }
